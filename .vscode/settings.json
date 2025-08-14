@@ -1,0 +1,11 @@
+{
+  "typescript.tsdk": "./node_modules/typescript/lib",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "search.exclude": {
+    ".yarn/": true
+  },
+  "editor.formatOnSave": true
+}
