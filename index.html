@@ -3,9 +3,118 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>{{html .Name}}</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@3.0.0/dist/iconify-icon.min.js"></script>
+    <script src="src/theme.ts" type="module"></script>
   </head>
-  <body>
-    <script src="src/index.ts" type="module"></script>
+  <body class="p-8">
+    {{- define "icon"}} {{- if .IsDir}} {{- if .IsSymlink }}
+    <iconify-icon class="size-[24px]" icon="tabler:folder-symlink" width="24" height="24"></iconify-icon>
+    {{- else}}
+    <iconify-icon class="size-[24px]" icon="tabler:folder" width="24" height="24"></iconify-icon>
+    {{- end}} {{- else if or (eq .Name "LICENSE") (eq .Name "README")}}
+    <iconify-icon class="size-[24px]" icon="tabler:license" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".jpg" ".jpeg" ".png" ".gif" ".webp" ".tiff" ".bmp" ".heif" ".heic" ".svg" ".avif"}}
+    <iconify-icon class="size-[24px]" icon="tabler:photo" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".mp4" ".mov" ".m4v" ".mpeg" ".mpg" ".avi" ".ogg" ".webm" ".mkv" ".vob" ".gifv" ".3gp"}}
+    <iconify-icon class="size-[24px]" icon="tabler:movie" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".mp3" ".m4a" ".aac" ".ogg" ".flac" ".wav" ".wma" ".midi" ".cda"}}
+    <iconify-icon class="size-[24px]" icon="tabler:file-music" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".pdf"}}
+    <iconify-icon class="size-[24px]" icon="tabler:file-type-pdf" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".csv" ".tsv"}}
+    <iconify-icon class="size-[24px]" icon="tabler:file-type-csv" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".txt" ".doc" ".docx" ".odt" ".fodt" ".rtf"}}
+    <iconify-icon class="size-[24px]" icon="tabler:file-text" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".xls" ".xlsx" ".ods" ".fods"}}
+    <iconify-icon class="size-[24px]" icon="tabler:file-spreadsheet" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".ppt" ".pptx" ".odp" ".fodp"}}
+    <iconify-icon class="size-[24px]" icon="tabler:presentation-analytics" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".zip" ".gz" ".xz" ".tar" ".7z" ".rar" ".xz" ".zst"}}
+    <iconify-icon class="size-[24px]" icon="tabler:file-zip" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".deb" ".dpkg"}}
+    <iconify-icon class="size-[24px]" icon="tabler:brand-debian" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".rpm" ".exe" ".flatpak" ".appimage" ".jar" ".msi" ".apk"}}
+    <iconify-icon class="size-[24px]" icon="tabler:package" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".ps1"}}
+    <iconify-icon class="size-[24px]" icon="tabler:brand-powershell" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".py" ".pyc" ".pyo"}}
+    <iconify-icon class="size-[24px]" icon="tabler:brand-python" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".bash" ".sh" ".com" ".bat" ".dll" ".so"}}
+    <iconify-icon class="size-[24px]" icon="tabler:script" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".dmg"}}
+    <iconify-icon class="size-[24px]" icon="tabler:brand-finder" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".iso" ".img"}}
+    <iconify-icon class="size-[24px]" icon="tabler:disc" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".md" ".mdown" ".markdown"}}
+    <iconify-icon class="size-[24px]" icon="tabler:markdown" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".ttf" ".otf" ".woff" ".woff2" ".eof"}}
+    <iconify-icon class="size-[24px]" icon="tabler:file-typography" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".go"}}
+    <iconify-icon class="size-[24px]" icon="tabler:brand-golang" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".html" ".htm"}}
+    <iconify-icon class="size-[24px]" icon="tabler:file-type-html" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".js"}}
+    <iconify-icon class="size-[24px]" icon="tabler:file-type-js" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".css"}}
+    <iconify-icon class="size-[24px]" icon="tabler:file-type-css" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".json" ".json5" ".jsonc"}}
+    <iconify-icon class="size-[24px]" icon="tabler:json" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".ts"}}
+    <iconify-icon class="size-[24px]" icon="tabler:file-type-ts" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".sql"}}
+    <iconify-icon class="size-[24px]" icon="tabler:file-type-sql" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".db" ".sqlite" ".bak" ".mdb"}}
+    <iconify-icon class="size-[24px]" icon="tabler:database" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".eml" ".email" ".mailbox" ".mbox" ".msg"}}
+    <iconify-icon class="size-[24px]" icon="tabler:mail" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".crt" ".pem" ".x509" ".cer" ".ca-bundle"}}
+    <iconify-icon class="size-[24px]" icon="tabler:certificate" width="24" height="24"></iconify-icon>
+    {{- else if .HasExt ".key" ".keystore" ".jks" ".p12" ".pfx" ".pub"}}
+    <iconify-icon class="size-[24px]" icon="tabler:key" width="24" height="24"></iconify-icon>
+    {{- else}} {{- if .IsSymlink}}<iconify-icon
+      class="size-[24px]"
+      icon="tabler:file-symlink"
+      width="24"
+      height="24"
+    ></iconify-icon>
+    {{- else}}<iconify-icon class="size-[24px]" icon="tabler:file" width="24" height="24"></iconify-icon>
+    {{- end}} {{- end}} {{- end}}
+    <div class="breadcrumbs text-sm px-4 flex justify-between h-10">
+      <ul>
+        {{- range $i, $crumb := .Breadcrumbs}}
+        <li class="h-[16px]">
+          <a href="{{html $crumb.Link}}" class="min-w-4"
+            >{{if eq $i 0}}<iconify-icon class="size-[16px]" icon="tabler:home" width="16" height="16"></iconify-icon
+            >{{else}}{{html $crumb.Text}}{{end}}</a
+          >
+        </li>
+        {{- end}}
+      </ul>
+      <label class="swap swap-rotate">
+        <input type="checkbox" id="dark-mode-toggle" value="dark" />
+        <iconify-icon class="swap-off" icon="tabler:sun" width="20" height="20"></iconify-icon>
+        <iconify-icon class="swap-on" icon="tabler:moon" width="20" height="20"></iconify-icon>
+      </label>
+    </div>
+    <ul class="list mt-4">
+      {{- if .CanGoUp}}<a class="hover:bg-base-200" href="..">
+        <li class="list-row items-center">
+          <iconify-icon class="size-[24px]" icon="tabler:corner-left-up" width="24" height="24"></iconify-icon>
+          <div>Parent Directory</div>
+        </li></a
+      >{{- end}} {{- range .Items}}
+      <a href="{{html .URL}}" class="hover:bg-base-200" {{- if .IsDir}}data-is-directory="true" {{end}} data-file-name="{{html .Name}}" data-file-size="{{.Size}}" data-file-mod-time="{{html (.HumanModTime "2006-01-02T15:04:05Z")}}">
+        <li class="list-row items-center">
+          {{- template "icon" .}}
+          <div>{{html .Name}}</div>
+          <div>{{.HumanSize}}</div>
+          <div>{{html (.HumanModTime "2006-01-02 15:04:05")}}</div>
+        </li>
+      </a>
+      {{ end}}
+    </ul>
   </body>
 </html>
