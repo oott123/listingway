@@ -20,7 +20,7 @@ jobs:
       - run: dd if=/dev/random of=./html/file2 bs=1M count=3
       - run: dd if=/dev/random of=./html/file3 bs=1M count=1
       - run: mkdir -p html/screenshots && cp promote/*.png ./html/screenshots
-      - run: wget --mirror -p http://localhost:8081 -P ./example
+      - run: wget --mirror -k -p http://localhost:8081 -P ./example
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
