@@ -70,8 +70,10 @@ async function getFileHandle(fileName: string) {
   try {
     const handle = await window.showSaveFilePicker({ suggestedName: fileName })
     return { opfs: false, handle }
-  } catch (e) {
-    console.warn('failed to showSaveFilePicker, fallback to OPFS', e)
+  } catch (e: any) {
+    if ('name' in e && e.name === 'AbortError') {
+      throw new Error('user aborted')
+    }
     return { opfs: true, handle: await getOpfsFileHandle(fileName) }
   }
 }
@@ -121,12 +123,19 @@ document.querySelector('[data-download-accelerated]')?.addEventListener('click',
     const progress = document.querySelector('[data-download-progress]') as HTMLProgressElement
     progress.classList.remove('hidden')
     closest.style.display = 'none'
-    void downloadFile(url, fileName).then(() => {
-      progress.classList.add('hidden')
-      progress.value = 0
-      const success = document.querySelector('[data-success]') as HTMLButtonElement
-      success?.classList.remove('hidden')
-    })
+    void downloadFile(url, fileName)
+      .then(() => {
+        progress.classList.add('hidden')
+        progress.value = 0
+        const success = document.querySelector('[data-success]') as HTMLButtonElement
+        success?.classList.remove('hidden')
+      })
+      .catch((e) => {
+        console.error(e)
+        progress.classList.add('hidden')
+        progress.value = 0
+        closest.style.removeProperty('display')
+      })
   }
 })
 
