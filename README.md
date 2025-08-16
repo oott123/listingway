@@ -51,3 +51,5 @@ Note that you should not change the `_listingway/assets` part in the `handle` an
 You should only see the Accelerated Download button on the [supported browser](https://developer.mozilla.org/en-US/docs/Web/API/Window/showSaveFilePicker#browser_compatibility) under a [secure context](https://www.w3.org/TR/secure-contexts/).
 
 This means **http** origins are not supported (use **https**!), except you are accessing from localhost.
+
+Please note that we don't support Safari for now due to lack of [`createWritable`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle/createWritable) API.

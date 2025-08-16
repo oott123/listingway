@@ -169,5 +169,7 @@ if (file) {
 }
 
 if ('storage' in navigator || 'showSaveFilePicker' in window) {
-  document.querySelector('html')?.classList.add('storage-enabled')
+  if ('FileSystemFileHandle' in window && 'createWritable' in FileSystemFileHandle.prototype) {
+    document.querySelector('html')?.classList.add('storage-enabled')
+  }
 }
