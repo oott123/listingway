@@ -18,6 +18,7 @@ function openDialog(data: Record<string, string>, a: HTMLAnchorElement) {
     } else {
       a_.setAttribute('data-file-url', a.href)
       a_.setAttribute('data-file-name', data['file-name'])
+      a_.setAttribute('data-file-size-bytes', data['file-size-bytes'])
     }
   })
 
@@ -51,6 +52,7 @@ function openFile(a: HTMLAnchorElement) {
     {
       'file-name': a.dataset.fileName!,
       'file-size': filesize(Number(a.dataset.fileSize), { standard: 'iec' }),
+      'file-size-bytes': a.dataset.fileSize!,
       'file-modified': new Date(a.dataset.fileModTime!).toLocaleString(),
     },
     a,
@@ -82,9 +84,15 @@ function downloadFile(url: string, fileName: string) {
   const progress = document.querySelector('[data-download-progress]') as HTMLProgressElement
   return (async () => {
     const { opfs, handle } = await getFileHandle(fileName)
-    await turboDownload(url, fileName, 4, 8 * 1024 * 1024, handle, (rate) => {
+    const start = Date.now()
+    let fileSize = 0
+    await turboDownload(url, fileName, 4, 8 * 1024 * 1024, handle, (rate, _, total) => {
       progress.value = rate * 100
+      fileSize = total
     })
+    const duration = Date.now() - start
+    const speed = fileSize ? (fileSize / duration) * 1000 : 0
+    console.log(`downloaded ${fileName} in ${duration}ms, ${speed.toFixed(2)} bytes/s`)
     if (opfs) {
       const blob = await handle.getFile()
       const url = URL.createObjectURL(blob)
@@ -97,6 +105,7 @@ function downloadFile(url: string, fileName: string) {
       dialog.setAttribute('data-opfs-file-name', fileName)
       dialog.showModal()
     }
+    return { speed, duration }
   })()
 }
 
@@ -124,11 +133,13 @@ document.querySelector('[data-download-accelerated]')?.addEventListener('click',
     progress.classList.remove('hidden')
     closest.style.display = 'none'
     void downloadFile(url, fileName)
-      .then(() => {
+      .then(({ speed, duration }) => {
         progress.classList.add('hidden')
         progress.value = 0
         const success = document.querySelector('[data-success]') as HTMLButtonElement
         success?.classList.remove('hidden')
+
+        success.querySelector('span')!.textContent = `${filesize(speed)}/s, ${(duration / 1000).toFixed(1)} seconds`
       })
       .catch((e) => {
         console.error(e)
