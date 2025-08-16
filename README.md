@@ -10,6 +10,8 @@
 
 Listingway is a [caddy file server browse template](https://caddyserver.com/docs/caddyfile/directives/file_server) which provides light and clean user interface. It also provides a parallel downloader which can accelerate download speed on some of network conditions.
 
+[Try a live demo](https://oott123.github.io/listingway/) now! (Note: This static generated demo may not offering the full experience as caddy.)
+
 ## Features
 
 - Dark mode / Light mode
