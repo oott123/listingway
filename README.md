@@ -53,3 +53,7 @@ You should only see the Accelerated Download button on the [supported browser](h
 This means **http** origins are not supported (use **https**!), except you are accessing from localhost.
 
 Please note that we don't support Safari for now due to lack of [`createWritable`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle/createWritable) API.
+
+### I'm not getting faster!
+
+That's common if you are using HTTP/2 for your web server. Browsers like Chrome will do multiplexing under such protocol result no performance improve. Consider disabling it on your download server.
