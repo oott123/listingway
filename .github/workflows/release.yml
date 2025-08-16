@@ -13,8 +13,7 @@ jobs:
       - uses: jdx/mise-action@v2
       - run: corepack yarn install
       - run: corepack yarn vite build --base /_listingway
-      - run: mv dist listingway
       - uses: actions/upload-artifact@v4
         with:
           name: listingway
-          path: listingway
+          path: dist
