@@ -80,7 +80,7 @@ If given, file will be downloaded from this list of prefix. The origin of the li
 
 If multiple prefixes are given, workers will select one of them round-robin.
 
-This is useful to bypass the h2 multiplexing since browser will not multiplexing connections to different domains.
+This is useful to bypass the h2 multiplexing since browser will not multiplexing connections to different top-level domains.
 
 CORS must be enabled while using this option. Sample config below:
 
@@ -109,4 +109,4 @@ This is common if you are using HTTP/2 on your web server.
 
 Browsers like Chrome use multiplexing with this protocol, which results in no performance improvement.
 
-Consider disabling HTTP/2 on your download server or setup multiple prefixes with different domains.
+Consider disabling HTTP/2 on your download server or setup multiple prefixes with different top-level domains.
