@@ -26,7 +26,7 @@ Listingway is a [caddy file server browse template](https://caddyserver.com/docs
 
 ## Usage
 
-Download the bundle from release and upload to your server. Adds configuration below:
+Download the bundle from [releases](https://github.com/oott123/listingway/releases/latest) and upload to your server. Adds configuration below:
 
 ```caddy
 file_server {
