@@ -37,7 +37,7 @@ function openDialog(data: Record<string, string>, a: HTMLAnchorElement) {
   dialog?.showModal()
 }
 
-document.querySelector('[data-close]')?.addEventListener('click', () => {
+document.querySelector('#file-dialog [data-close]')?.addEventListener('click', () => {
   const url = new URL(location.href)
   url.searchParams.delete('file')
   history.replaceState({}, '', url.toString())
@@ -57,15 +57,50 @@ function openFile(a: HTMLAnchorElement) {
   )
 }
 
+async function getOpfsFileHandle(fileName: string) {
+  const directory = await navigator.storage.getDirectory()
+  const file = await directory.getFileHandle(fileName, { create: true })
+  return file
+}
+
 function downloadFile(url: string, fileName: string) {
   const progress = document.querySelector('[data-download-progress]') as HTMLProgressElement
   return (async () => {
-    const handle = await window.showSaveFilePicker({ suggestedName: fileName })
+    const useOpfs = !('showSaveFilePicker' in window)
+    const handle = useOpfs
+      ? await getOpfsFileHandle(fileName)
+      : await window.showSaveFilePicker({ suggestedName: fileName })
     await turboDownload(url, fileName, 4, 8 * 1024 * 1024, handle, (rate) => {
       progress.value = rate * 100
     })
+    if (useOpfs) {
+      const blob = await handle.getFile()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = fileName
+      a.click()
+      const dialog = document.querySelector('#delete-dialog') as HTMLDialogElement
+      dialog.setAttribute('data-object-url', url.toString())
+      dialog.setAttribute('data-opfs-file-name', fileName)
+      dialog.showModal()
+    }
   })()
 }
+
+document.querySelector('#delete-dialog button')?.addEventListener('click', () => {
+  const url = document.querySelector('#delete-dialog')?.getAttribute('data-object-url')
+  const fileName = document.querySelector('#delete-dialog')?.getAttribute('data-opfs-file-name')
+  void (async () => {
+    if (url && fileName) {
+      URL.revokeObjectURL(url)
+      const directory = await navigator.storage.getDirectory()
+      await directory.removeEntry(fileName)
+      const dialog = document.querySelector('#delete-dialog') as HTMLDialogElement
+      dialog.close()
+    }
+  })()
+})
 
 document.querySelector('[data-download-accelerated]')?.addEventListener('click', (e) => {
   e.preventDefault()
@@ -103,6 +138,6 @@ if (file) {
   }
 }
 
-if ('storage' in navigator && 'showSaveFilePicker' in window) {
+if ('storage' in navigator || 'showSaveFilePicker' in window) {
   document.querySelector('html')?.classList.add('storage-enabled')
 }

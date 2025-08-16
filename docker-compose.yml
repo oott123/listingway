@@ -5,6 +5,6 @@ services:
       - '8081:80'
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./html:/usr/share/nginx/html/data:ro
-      - ./dist:/usr/share/nginx/html/_template:ro
+      - ./html:/usr/share/nginx/html:ro
+      - ./dist:/usr/share/nginx/listingway:ro
     restart: unless-stopped
