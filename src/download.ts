@@ -1,5 +1,5 @@
 /**
- * 多线程 + 流式 + bitmap + 单线程保存 + 重试 的下载器
+ * 多线程 + 流式 + 单线程保存 + 重试 的下载器
  *
  * @param {string} url 下载地址
  * @param {string} fileName OPFS 保存文件名
@@ -40,11 +40,12 @@ interface DownloadResult {
 // 定义进度回调函数类型
 type ProgressCallback = (progress: number, downloaded: number, total: number) => void
 
-async function downloadBigFileWithRetryToOpfs(
+async function turboDownload(
   url: string,
   fileName: string,
   workerCount: number = 4,
   chunkSize: number = 8 * 1024 * 1024,
+  fileHandle: FileSystemFileHandle,
   onProgress: ProgressCallback = () => {},
   opts: DownloadOptions = {},
 ): Promise<DownloadResult> {
@@ -70,88 +71,26 @@ async function downloadBigFileWithRetryToOpfs(
   }
 
   const totalChunks = Math.ceil(totalSize / chunkSize)
-  const root = await navigator.storage.getDirectory()
-  const fileHandle = await root.getFileHandle(fileName, { create: true })
   const writable = await fileHandle.createWritable({ keepExistingData: true })
   if (typeof writable.truncate === 'function') {
     // 预先确保文件长度，便于写入
     await writable.truncate(totalSize)
   }
 
-  const metaName = fileName + '.meta.bin'
-  const metaHandle = await root.getFileHandle(metaName, { create: true })
-
-  // 读取或新建 bitmap
-  const bytesNeeded = Math.ceil(totalChunks / 8)
-  let bitmap: Uint8Array
-  try {
-    const metaFile = await metaHandle.getFile()
-    const buf = await metaFile.arrayBuffer()
-    bitmap = new Uint8Array(buf)
-    if (bitmap.length < bytesNeeded) {
-      const newb = new Uint8Array(bytesNeeded)
-      newb.set(bitmap)
-      bitmap = newb
-    }
-  } catch (e) {
-    bitmap = new Uint8Array(bytesNeeded)
-  }
-
-  const isDone = (i: number): boolean => (bitmap[Math.floor(i / 8)] & (1 << i % 8)) !== 0
-  const markDone = (i: number): void => {
-    bitmap[Math.floor(i / 8)] |= 1 << i % 8
-  }
-
-  // 计算已完成的总字节（只统计已完成的 chunk）
-  let downloadedBytesPersist = 0
-  for (let i = 0; i < totalChunks; i++) {
-    if (isDone(i)) {
-      const actual = i === totalChunks - 1 ? totalSize - i * chunkSize : chunkSize
-      downloadedBytesPersist += actual
-    }
-  }
   // 初始回调
-  onProgress(downloadedBytesPersist / totalSize, downloadedBytesPersist, totalSize)
+  onProgress(0, 0, totalSize)
 
   // 构建任务队列（只包含未完成 chunk 的索引）
   const tasks: number[] = []
-  for (let i = 0; i < totalChunks; i++) if (!isDone(i)) tasks.push(i)
+  for (let i = 0; i < totalChunks; i++) tasks.push(i)
+
+  let bytesWritten = 0
 
   // 重试计数器
   const retryCount = new Map<number, number>() // chunkIndex => attemptsUsed
 
   // 错误收集
   const errors: DownloadError[] = []
-
-  // dirty 标记与 saver 控制
-  let dirty = false
-  let saverStop = false
-
-  async function saverLoop(): Promise<void> {
-    while (!saverStop) {
-      await new Promise((r) => setTimeout(r, saveIntervalMs))
-      if (!dirty) continue
-      try {
-        const w = await metaHandle.createWritable()
-        await w.write(bitmap)
-        await w.close()
-        dirty = false
-      } catch (e) {
-        console.error('保存 bitmap 失败:', e)
-      }
-    }
-    // 退出前再保存一次
-    if (dirty) {
-      try {
-        const w = await metaHandle.createWritable()
-        await w.write(bitmap)
-        await w.close()
-        dirty = false
-      } catch (e) {
-        console.error('退出前保存 bitmap 失败:', e)
-      }
-    }
-  }
 
   // 从任务队列拿下一个任务（同步操作，JS 单线程下安全）
   function getNextTask(): number | null {
@@ -202,28 +141,17 @@ async function downloadBigFileWithRetryToOpfs(
             await writable.write({ type: 'write', position: offset, data: value })
             offset += value.length
             attemptBytes += value.length
+            bytesWritten += value.length
 
-            // 临时进度回调（persist + attempt）
-            onProgress(
-              (downloadedBytesPersist + attemptBytes) / totalSize,
-              downloadedBytesPersist + attemptBytes,
-              totalSize,
-            )
+            onProgress(bytesWritten / totalSize, bytesWritten, totalSize)
           }
-
-          // chunk 完整下载完成
-          markDone(chunkIndex)
-          dirty = true
-          // 把这 chunk 的实际大小加到持久计数
-          const actualChunkSize = chunkIndex === totalChunks - 1 ? totalSize - chunkIndex * chunkSize : chunkSize
-          downloadedBytesPersist += actualChunkSize
-          onProgress(downloadedBytesPersist / totalSize, downloadedBytesPersist, totalSize)
 
           success = true
         } catch (err) {
           // 下载或写入出错：重试或记录错误
           console.warn(`chunk ${chunkIndex} 第 ${attempt} 次尝试失败:`, err)
           attempt++
+          bytesWritten -= attemptBytes
           retryCount.set(chunkIndex, attempt - 1)
           if (attempt <= maxRetries) {
             await sleepWithBackoff(attempt - 1)
@@ -242,7 +170,6 @@ async function downloadBigFileWithRetryToOpfs(
   } // end workerMain
 
   // 启动 saver 与 workers
-  const saverPromise = saverLoop()
   const workerPromises: Promise<void>[] = []
   for (let i = 0; i < workerCount; i++) {
     workerPromises.push(
@@ -255,34 +182,18 @@ async function downloadBigFileWithRetryToOpfs(
   // 等待所有 worker 结束
   await Promise.all(workerPromises)
 
-  // 停止 saver 并确保写一次
-  saverStop = true
-  await saverPromise
-
   // 关闭 writable（flush）
   await writable.close()
 
   // 检查是否全部完成
   let allDone = true
   for (let i = 0; i < totalChunks; i++) {
-    if (!isDone(i)) {
-      allDone = false
-      break
-    }
-  }
-
-  if (allDone) {
-    try {
-      await root.removeEntry(metaName)
-    } catch (e) {
-      console.warn('删除 meta 文件失败:', e)
-    }
-  } else {
-    // 保证 meta 已保存（saver 已在停止前保存一次）
+    allDone = false
+    break
   }
 
   return { success: allDone && errors.length === 0, errors }
 }
 
-export { downloadBigFileWithRetryToOpfs }
+export { turboDownload }
 export type { DownloadOptions, DownloadError, DownloadResult, ProgressCallback }

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="scrollbar-gutter: stable;" class="group">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -116,5 +116,37 @@
       </a>
       {{ end}}
     </ul>
+    <dialog id="file-dialog" class="modal">
+      <div class="modal-box space-y-4 pb-8">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" data-close>✕</button>
+        <h3 data-fill="file-name" class="text-lg font-bold w-full truncate">100mb.test</h3>
+        <div class="stats shadow flex flex-col md:flex-row">
+          <div class="stat">
+            <div class="stat-title">Size</div>
+            <div data-fill="file-size" class="stat-value text-base font-semibold">100MB</div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">Modified</div>
+            <div data-fill="file-modified" class="stat-value text-base font-semibold">2025-01-01 12:00:00</div>
+          </div>
+        </div>
+        <div class="flex flex-col md:flex-row gap-2 items-center">
+          <a href="" target="_blank" class="btn w-full md:flex-1" data-file-url>
+            <iconify-icon icon="tabler:external-link" width="20" height="20"></iconify-icon>
+            <span class="flex-1">Open in Browser</span>
+          </a>
+          <progress class="hidden progress w-full md:flex-1 mx-4" data-download-progress max="100" value="0"></progress>
+          <button class="btn btn-primary w-full md:flex-1 group-[.storage-enabled]:flex hidden" data-file-url data-download-accelerated>
+            <iconify-icon icon="tabler:cloud-download" width="20" height="20"></iconify-icon>
+            <span class="flex-1">Accelerated Download</span>
+          </button>
+          <button class="btn btn-success w-full md:flex-1 hidden" data-success>
+            <iconify-icon icon="tabler:check" width="20" height="20"></iconify-icon>
+            <span class="flex-1">Successfully Downloaded</span>
+          </button>
+        </div>
+      </div>
+    </dialog>
+    <script src="src/index.ts" type="module"></script>
   </body>
 </html>
