@@ -9,6 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: corepack yarn install
+      - run: corepack yarn vite build --base /_listingway
       - run: docker compose up -d
       - run: dd if=/dev/random of=./html/file1 bs=1M count=5
       - run: dd if=/dev/random of=./html/file2 bs=1M count=3
