@@ -104,7 +104,7 @@
     </div>
     <ul class="list mt-4">
       {{- if .CanGoUp }}
-        <a class="hover:bg-base-200" href="..">
+        <a class="hover:bg-[var(--color-base-200)]" href="..">
           <li class="list-row items-center">
             <i class="size-[24px] i-tabler-corner-left-up"></i>
             <div>Parent Directory</div>
@@ -114,7 +114,7 @@
       {{- range .Items }}
         <a
           href="{{ html .URL }}"
-          class="hover:bg-base-200"
+          class="hover:bg-[var(--color-base-200)]"
           {{- if
             .IsDir
           }}
@@ -133,6 +133,15 @@
         </a>
       {{ end }}
     </ul>
+    <div class="text-xs text-right text-gray-500 mt-4 mx-4">
+      <a
+        href="https://github.com/oott123/listingway"
+        class="link hover:text-blue-500"
+        target="_blank"
+        rel="noopener noreferrer"
+        >listingway</a
+      >
+    </div>
     <dialog id="file-dialog" class="modal">
       <div class="modal-box space-y-4 pb-8">
         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" data-close>✕</button>

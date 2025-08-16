@@ -5,5 +5,7 @@ http://:80 {
   }
   file_server {
     browse /usr/share/nginx/html/_template/index.html
+    hide _template
   }
+  file_server /_template/*
 }
