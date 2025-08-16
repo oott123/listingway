@@ -76,7 +76,7 @@ Concurrent requests for download a single file.
 
 ### `prefixes`
 
-If given, file will be downloaded from this list of prefix. Origin will be replaced by the prefix given.
+If given, file will be downloaded from this list of prefix. The origin of the listing page will be replaced by the prefix given. Remember to include the prefix you used to serve the listing page if you want.
 
 If multiple prefixes are given, workers will select one of them round-robin.
 
