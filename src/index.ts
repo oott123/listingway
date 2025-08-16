@@ -63,17 +63,27 @@ async function getOpfsFileHandle(fileName: string) {
   return file
 }
 
+async function getFileHandle(fileName: string) {
+  if (!('showSaveFilePicker' in window)) {
+    return { opfs: true, handle: await getOpfsFileHandle(fileName) }
+  }
+  try {
+    const handle = await window.showSaveFilePicker({ suggestedName: fileName })
+    return { opfs: false, handle }
+  } catch (e) {
+    console.warn('failed to showSaveFilePicker, fallback to OPFS', e)
+    return { opfs: true, handle: await getOpfsFileHandle(fileName) }
+  }
+}
+
 function downloadFile(url: string, fileName: string) {
   const progress = document.querySelector('[data-download-progress]') as HTMLProgressElement
   return (async () => {
-    const useOpfs = !('showSaveFilePicker' in window)
-    const handle = useOpfs
-      ? await getOpfsFileHandle(fileName)
-      : await window.showSaveFilePicker({ suggestedName: fileName })
+    const { opfs, handle } = await getFileHandle(fileName)
     await turboDownload(url, fileName, 4, 8 * 1024 * 1024, handle, (rate) => {
       progress.value = rate * 100
     })
-    if (useOpfs) {
+    if (opfs) {
       const blob = await handle.getFile()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
