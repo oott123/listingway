@@ -86,7 +86,7 @@ function downloadFile(url: string, fileName: string) {
     const { opfs, handle } = await getFileHandle(fileName)
     const start = Date.now()
     let fileSize = 0
-    await turboDownload(url, fileName, 4, 8 * 1024 * 1024, handle, (rate, _, total) => {
+    await turboDownload(url, fileName, 8, 1024 * 1024, handle, (rate, _, total) => {
       progress.value = rate * 100
       fileSize = total
     })
