@@ -8,9 +8,9 @@
   <img alt="Screenshot of listingway showing its light and clean user interface." src="./promote/light.png">
 </picture>
 
-Listingway is a [caddy file server browse template](https://caddyserver.com/docs/caddyfile/directives/file_server) which provides light and clean user interface. It also provides a parallel downloader which can accelerate download speed on some of network conditions.
+Listingway is a [caddy file server browse template](https://caddyserver.com/docs/caddyfile/directives/file_server) that provides a light and clean user interface. It also includes a parallel downloader that can accelerate download speeds under certain network conditions.
 
-[Try a live demo](https://oott123.github.io/listingway/) now! (Note: This static generated demo may not offering the full experience as caddy.)
+[Try a live demo](https://oott123.github.io/listingway/) now! (Note: This statically generated demo may not provide the full experience of running under Caddy.)
 
 ## Features
 
@@ -28,7 +28,7 @@ Listingway is a [caddy file server browse template](https://caddyserver.com/docs
 
 ## Usage
 
-Download the bundle from [releases](https://github.com/oott123/listingway/releases/latest) and upload to your server. Adds configuration below:
+Download the bundle from [releases](https://github.com/oott123/listingway/releases/latest) and upload it to your server. Then add the configuration below:
 
 ```caddy
 file_server {
@@ -42,18 +42,18 @@ handle /_listingway/assets/* {
 }
 ```
 
-Note that you should not change the `_listingway/assets` part in the `handle` and `uri` directives, or you should build your own bundle.
+Note that you should not change the `_listingway/assets` part in the `handle` and `uri` directives, unless you build your own bundle.
 
 ## FAQ
 
-### No "Accelerated Download" button shown
+### No "Accelerated Download" button is shown
 
-You should only see the Accelerated Download button on the [supported browser](https://developer.mozilla.org/en-US/docs/Web/API/Window/showSaveFilePicker#browser_compatibility) under a [secure context](https://www.w3.org/TR/secure-contexts/).
+You will only see the **Accelerated Download** button in [supported browsers](https://developer.mozilla.org/en-US/docs/Web/API/Window/showSaveFilePicker#browser_compatibility) and under a [secure context](https://www.w3.org/TR/secure-contexts/).
 
-This means **http** origins are not supported (use **https**!), except you are accessing from localhost.
+This means **http** origins are not supported (use **https**!), except when accessing from localhost.
 
-Please note that we don't support Safari for now due to lack of [`createWritable`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle/createWritable) API.
+Please note that Safari is currently not supported due to the lack of the [`createWritable`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle/createWritable) API.
 
-### I'm not getting faster!
+### I'm not getting faster downloads!
 
-That's common if you are using HTTP/2 for your web server. Browsers like Chrome will do multiplexing under such protocol result no performance improve. Consider disabling it on your download server.
+This is common if you are using HTTP/2 on your web server. Browsers like Chrome use multiplexing with this protocol, which results in no performance improvement. Consider disabling HTTP/2 on your download server.
