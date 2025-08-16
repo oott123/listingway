@@ -2,5 +2,14 @@
   "singleQuote": true,
   "trailingComma": "all",
   "semi": false,
-  "printWidth": 120
+  "printWidth": 120,
+  "plugins": ["prettier-plugin-go-template"],
+  "overrides": [
+    {
+      "files": ["*.html"],
+      "options": {
+        "parser": "go-template"
+      }
+    }
+  ]
 }

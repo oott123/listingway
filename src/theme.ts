@@ -1,3 +1,6 @@
+import '@unocss/reset/tailwind.css'
+import 'uno.css'
+
 const isDark =
   localStorage.theme === 'dark' || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
 
