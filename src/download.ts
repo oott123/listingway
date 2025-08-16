@@ -18,7 +18,6 @@
 
 // 定义选项接口
 interface DownloadOptions {
-  saveIntervalMs?: number
   maxRetries?: number
   retryBaseMs?: number
   retryJitterMs?: number
@@ -41,7 +40,7 @@ interface DownloadResult {
 type ProgressCallback = (progress: number, downloaded: number, total: number) => void
 
 async function turboDownload(
-  url: string,
+  url: string[],
   fileName: string,
   workerCount: number = 4,
   chunkSize: number = 8 * 1024 * 1024,
@@ -49,14 +48,13 @@ async function turboDownload(
   onProgress: ProgressCallback = () => {},
   opts: DownloadOptions = {},
 ): Promise<DownloadResult> {
-  const saveIntervalMs = opts.saveIntervalMs ?? 1000
-  const maxRetries = opts.maxRetries ?? 4
+  const maxRetries = opts.maxRetries ?? Math.max(4, url.length)
   const retryBaseMs = opts.retryBaseMs ?? 500
   const retryJitterMs = opts.retryJitterMs ?? 200
   const acceptRangesCheck = opts.acceptRangesCheck ?? true
 
   // HEAD 获取 totalSize
-  const head = await fetch(url, { method: 'HEAD' })
+  const head = await fetch(url[0], { method: 'HEAD' })
   if (!head.ok) throw new Error(`HEAD 请求失败: ${head.status}`)
   const contentLength = head.headers.get('Content-Length')
   if (!contentLength) throw new Error('无法获得 Content-Length')
@@ -122,7 +120,9 @@ async function turboDownload(
 
       while (attempt <= maxRetries && !success) {
         try {
-          const resp = await fetch(url, { headers: { Range: `bytes=${start}-${end}` } })
+          const resp = await fetch(url[(id + attempt - 1) % url.length], {
+            headers: { Range: `bytes=${start}-${end}` },
+          })
           if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
           if (resp.status !== 206 && totalSize > chunkSize) {
             throw new Error(`服务器未返回 206 Partial Content（返回 ${resp.status}），无法安全分块下载`)

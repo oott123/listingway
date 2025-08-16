@@ -1,6 +1,34 @@
 import { filesize } from 'filesize'
 import { turboDownload } from './download.js'
 
+const defaultConfig = {
+  prefixes: [location.origin],
+  chunkSize: 1048576,
+  concurrent: 4,
+}
+
+async function loadConfig(): Promise<typeof defaultConfig> {
+  if ('listingwayConfig' in window) {
+    return (window as any).listingwayConfig
+  }
+
+  try {
+    const url = new URL(import.meta.env.BASE_URL, location.href)
+    const configUrl = url.toString().replace(/\/$/, '') + '/config.json'
+    const response = await fetch(configUrl)
+    const config = await response.json()
+    const newConfig = { ...defaultConfig, ...config }
+    ;(window as any).listingwayConfig = newConfig
+    return newConfig
+  } catch {
+    console.warn('Failed to load config, using default config. If you are not providing a config, that is normal.')
+    ;(window as any).listingwayConfig = defaultConfig
+    return defaultConfig
+  }
+}
+
+void loadConfig()
+
 function openDialog(data: Record<string, string>, a: HTMLAnchorElement) {
   const dialog = document.getElementById('file-dialog') as HTMLDialogElement
   const fills = dialog?.querySelectorAll('[data-fill]')
@@ -86,7 +114,10 @@ function downloadFile(url: string, fileName: string) {
     const { opfs, handle } = await getFileHandle(fileName)
     const start = Date.now()
     let fileSize = 0
-    await turboDownload(url, fileName, 17, 3.25 * 1024 * 1024, handle, (rate, _, total) => {
+    const config = await loadConfig()
+    const oldUrlSegment = new URL(url, location.href).toString().substring(location.origin.length)
+    const urls = config.prefixes.map((p) => `${p}${oldUrlSegment}`)
+    await turboDownload(urls, fileName, config.concurrent, config.chunkSize, handle, (rate, _, total) => {
       progress.value = rate * 100
       fileSize = total
     })

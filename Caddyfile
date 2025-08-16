@@ -1,6 +1,10 @@
 http://:80 {
   header {
     Cache-Control "private, no-cache, no-store, must-revalidate"
+    Access-Control-Allow-Origin "*"
+    Access-Control-Allow-Methods "GET, OPTIONS"
+    Access-Control-Allow-Headers "Range"
+    Access-Control-Expose-Headers "Content-Range"
   }
   file_server {
     root /usr/share/nginx/html
@@ -11,4 +15,7 @@ http://:80 {
     root /usr/share/nginx/listingway/assets
     file_server
   }
+  respond /_listingway/config.json <<CONFIG
+  { "prefixes": [ "http://localhost:8081","http://127.0.0.1:8081" ], "chunkSize": 1048576, "concurrent": 4}
+  CONFIG 200
 }
